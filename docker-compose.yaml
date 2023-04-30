@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  taskmanager.db:
+    image: postgres:15.2
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=taskmanager_user
+      - POSTGRES_PASSWORD=taskmanager_password
+      - POSTGRES_DB=taskmanager
