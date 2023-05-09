@@ -1,8 +1,6 @@
 package org.kybprototyping.taskmanager.taskmanager;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.UpdateTimestamp;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import jakarta.persistence.Column;
@@ -41,23 +39,32 @@ class TaskEntity {
   @Column(name = "execution_date")
   private OffsetDateTime executionDate;
 
-  @Column(name = "retry_count")
+  @Column(name = "try_count")
   @NotNull
-  private int retryCount;
+  private int tryCount;
 
-  @Column(name = "timeout")
+  @Column(name = "timeout_sec")
   @NotNull
   private long timeoutSec;
 
-  @Column(name = "exception_stack_trace")
-  private String exceptionStackTrace;
-
   @Column(name = "modification_date")
-  @CreationTimestamp
+  @NotNull
   private OffsetDateTime modificationDate;
 
   @Column(name = "creation_date")
-  @UpdateTimestamp
+  @NotNull
   private OffsetDateTime creationDate;
+
+  static <H extends InputOnlyHandler<I>, I> TaskEntity fromTask(Task<H, I> task) {
+    return TaskEntity.builder().handlerClassName(task.getHandlerClass().getName())
+        .input(Helper.toJson(task.getInput())).inputClassName(task.getInput().getClass().getName())
+        .executionDate(task.getExecutionDate()).timeoutSec(task.getTimeoutSec()).build();
+  }
+
+  static <H extends InputOnlyHandler<I>, I> Task<H, I> toTask(TaskEntity entity) {
+    return new Task<>(entity.getId(), Helper.findClass(entity.getHandlerClassName()),
+        Helper.fromJson(entity.getInput()), entity.getExecutionDate(), entity.getTryCount(),
+        entity.getTimeoutSec(), entity.getModificationDate(), entity.getCreationDate());
+  }
 
 }
